@@ -15,6 +15,8 @@ type OOMEvent struct {
 	FComm      string `json:"fcomm"`
 	CgroupID   uint32 `json:"cgroupID"`
 	CgroupPath string `json:"cgroup_path"`
+	UStackSize int    `json:"ustack_size"`
+	UStack     string `json:"ustack"`
 }
 
 // loadBpf returns the embedded CollectionSpec for bpf.

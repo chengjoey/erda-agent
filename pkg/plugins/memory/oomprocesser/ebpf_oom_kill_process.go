@@ -76,6 +76,16 @@ func DecodeMapItem(e []byte) *OOMEvent {
 	m.Pid = binary.LittleEndian.Uint32(e[0:4])
 	m.FComm = string(e[4:20])
 	m.CgroupID = binary.LittleEndian.Uint32(e[20:24])
-	m.CgroupPath = string(e[24:])
+	//m.CgroupPath = string(e[24:153])
+	m.UStackSize = int(e[24])
+	m.UStack = string(e[25 : 25+m.UStackSize])
+	//var maxDepth = 10
+	//if m.UStackSize < maxDepth {
+	//	maxDepth = m.UStackSize
+	//}
+	//for i := 0; i < maxDepth; i++ {
+	//	m.UStack += string(e[25+i*4 : 29+i*4])
+	//}
+	//m.UStack = string(e[25:65])
 	return m
 }

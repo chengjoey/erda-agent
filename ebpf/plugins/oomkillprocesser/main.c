@@ -13,6 +13,8 @@
 #define TASK_COMM_LEN 16
 #endif
 
+#define MAX_STACK_RAWTP 50
+
 #define SYM_LEN 50
 
 struct oom_stats {
@@ -20,7 +22,9 @@ struct oom_stats {
     __u32 pid;
     char fcomm[TASK_COMM_LEN];
     __u32 cgroupid;
-    char cgroup_path[129];
+//    char cgroup_path[129];
+    int user_stack_size;
+    __u64 ustack[MAX_STACK_RAWTP];
 };
 
 static __always_inline int get_cgroup_name(char *buf, size_t sz) {
@@ -74,10 +78,16 @@ int kprobe_oom_kill_process(struct pt_regs *ctx) {
     __u32 cgroupid = bpf_get_current_cgroup_id();
     s->cgroupid = cgroupid;
 
-    if (get_cgroup_name(s->cgroup_path, sizeof(s->cgroup_path)) < 0) {
-        bpf_printk("failed to get cgroup name\n");
-        return -1;
-    }
+    int max_len;
+    max_len = MAX_STACK_RAWTP * sizeof(__u64);
+    s->user_stack_size = bpf_get_stack(ctx, s->ustack, max_len, BPF_F_USER_STACK);
+
+    bpf_printk("user stack: %llx, size: %d\n", s->ustack, s->user_stack_size);
+
+//    if (get_cgroup_name(s->cgroup_path, sizeof(s->cgroup_path)) < 0) {
+//        bpf_printk("failed to get cgroup name\n");
+//        return -1;
+//    }
 //    get_dir_by_knid(cgroupid, s->cgroup_path, sizeof(s->cgroup_path));
 
 //    char idfmt[] = "oom process cgroup knid: %d, pages: %d, name: %s\n";
